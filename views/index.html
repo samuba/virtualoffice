@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>HTML5 Media Device Access</title>
+  <title>Virtual Office</title>
 </head>
   
 <style>
@@ -16,44 +16,44 @@
     width: 100%;
     height: 100%;
     background: #191413;
-  } 
+  }
+  
+  .pic {
+    display: inline-block;
+    margin: 2px 1px 2px 1px;
+  }
 </style>
   
 <body>
 
   <video autoplay></video>
   <div id="background">
-    <img class="self pic">
   </div>
-  
-  
 
 <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
 <script>
-  // Initialize Firebase
-  var config = {
+  firebase.initializeApp({
     apiKey: "AIzaSyA1GrOBNfS-lQPOKWtdV3KGMa06v0kOe1I",
     authDomain: "virtualoffice-7562b.firebaseapp.com",
     databaseURL: "https://virtualoffice-7562b.firebaseio.com",
     projectId: "virtualoffice-7562b",
     storageBucket: "virtualoffice-7562b.appspot.com",
     messagingSenderId: "309101480991"
-  };
-  firebase.initializeApp(config);
+  })
   
-  function uuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  }
-</script>
-<script>
   var video = document.querySelector('video')
   var user = uuid()
   var currentRoom = joinRoom()  
   var usersRef = firebase.database().ref('rooms/' + currentRoom + '/users')
   
+  if (navigator.mediaDevices) {
+    navigator.mediaDevices.getUserMedia({video: true}) 
+      .then(stream => video.srcObject = stream) 
+      .catch(error => document.body.textContent = 'Error accessing camera: ' + error.name)
+  }
+  
+  sendCurrentPic()
+  setInterval(() => sendCurrentPic(), 5000)
   
   window.onbeforeunload = () => {
     firebase.database().ref('rooms/' + currentRoom + '/users/' + user).remove()
@@ -62,10 +62,7 @@
   
   usersRef.on("child_added", data => { 
     console.log("added", data.val())
-    let img = document.createElement('img')
-    img.setAttribute("id", data.val().name)
-    img.src = data.val().pic
-    document.getElementById('background').appendChild(img)
+    addPic(data.val())
   })
   
   usersRef.on("child_removed", data => {
@@ -76,20 +73,33 @@
   
   usersRef.on("child_changed", data => {
     console.log("changed", data.val())
+    if (!document.getElementById(data.val().name)) {
+      addPic(data.val())
+    }
     document.getElementById(data.val().name).src = data.val().pic
   })
   
-  setInterval(() => { 
+  function addPic(user) {
+    let img = document.createElement('img')
+    img.setAttribute("id", user.name)
+    img.setAttribute("class", "pic")
+    img.src = user.pic
+    document.getElementById('background').appendChild(img)
+  }
+  
+  function uuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+  
+  function sendCurrentPic() {
     firebase.database().ref('rooms/' + currentRoom + '/users/' + user).set({
       name: user,
-      pic: takePicture() 
+      pic: takePicture(),
+      time: firebase.database.ServerValue.TIMESTAMP
     })
-  }, 5000)
-  
-  if (navigator.mediaDevices) {
-    navigator.mediaDevices.getUserMedia({video: true}) 
-      .then(stream => video.srcObject = stream) 
-      .catch(error => document.body.textContent = 'Error accessing camera: ' + error.name)
   }
   
   function joinRoom() {
