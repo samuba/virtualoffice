@@ -53,7 +53,7 @@
   }
   
   sendCurrentPic()
-  setInterval(() => sendCurrentPic(), 5000)
+  setInterval(() => sendCurrentPic(), 10000)
   
   window.onbeforeunload = () => {
     firebase.database().ref('rooms/' + currentRoom + '/users/' + user).remove()
@@ -107,7 +107,6 @@
     if (window.location.hash && window.location.hash.startsWith(roomUrlPrefix)) {
       return window.location.hash.replace(roomUrlPrefix, "") 
     } 
-    
     let roomName = uuid()
     window.location.hash = roomUrlPrefix + roomName
     return roomName
