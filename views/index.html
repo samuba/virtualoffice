@@ -31,6 +31,7 @@
   </div>
 
 <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
+<script src="/lz-string.js"></script>
 <script>
   firebase.initializeApp({
     apiKey: "AIzaSyA1GrOBNfS-lQPOKWtdV3KGMa06v0kOe1I",
@@ -62,7 +63,7 @@
   
   usersRef.on("child_added", data => { 
     console.log("added", data.val())
-    addPic(data.val())
+    showPic(data.val())
   })
   
   usersRef.on("child_removed", data => {
@@ -73,18 +74,19 @@
   
   usersRef.on("child_changed", data => {
     console.log("changed", data.val())
-    if (!document.getElementById(data.val().name)) {
-      addPic(data.val())
-    }
-    document.getElementById(data.val().name).src = data.val().pic
+    showPic(data.val())
   })
   
-  function addPic(user) {
-    let img = document.createElement('img')
-    img.setAttribute("id", user.name)
-    img.setAttribute("class", "pic")
-    img.src = user.pic
-    document.getElementById('background').appendChild(img)
+  function showPic(user) {
+    let img = document.getElementById(user.name)
+    if (!img) {
+      img = document.createElement('img')
+      img.setAttribute("id", user.name)
+      img.setAttribute("class", "pic")
+      document.getElementById('background').appendChild(img)
+    }
+    img.src = LZString.decompress(user.pic)
+    console.log("src", { string: img.src })
   }
   
   function uuid() {
@@ -117,7 +119,9 @@
     canvas.width = video.offsetWidth
     canvas.height = video.offsetHeight
     canvas.getContext('2d').drawImage(video, 0, 0, video.offsetWidth, video.offsetHeight)
-    return canvas.toDataURL('image/jpeg')
+    console.log("beforecompress", { string: canvas.toDataURL('image/jpeg') })
+    console.log("compress", { string: LZString.compress(canvas.toDataURL('image/jpeg')) })
+    return LZString.compress(canvas.toDataURL('image/jpeg'))
   }
 </script>
 </body>
