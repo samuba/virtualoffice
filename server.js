@@ -1,39 +1,69 @@
-// server.js
-// where your node app starts
+const express = require("express");
+const app = express();
+const bodyParser = require('body-parser')
+const compression = require('compression');
 
-// init project
-var express = require('express');
-var app = express();
+app.use(compression())
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(express.static("public"));
 
-// we've started you off with Express, 
-// but feel free to use whatever libs or frameworks you'd like through `package.json`.
+const rooms = {
+  testRoom: {
+    users: {
+     user1: { imageData: "", updatedAt: new Date() }
+    }  
+  },
+};
 
-// http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
-
-// http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (request, response) {
-  response.sendFile(__dirname + '/views/index.html');
+app.get("/", (request, response) => {
+  response.sendFile(__dirname + "/views/index.html"); 
 });
 
-app.get("/dreams", function (request, response) {
-  response.send(dreams);
+app.get("/rooms", (request, response) => {
+  response.json(rooms);
 });
 
-// could also use the POST body instead of query string: http://expressjs.com/en/api.html#req.body
-app.post("/dreams", function (request, response) {
-  dreams.push(request.query.dream);
-  response.sendStatus(200);
+app.get("/rooms/:roomId", (req, res) => {
+  const roomId = req.params.roomId
+  const room = rooms[roomId] || createRoom(roomId)
+  purgeOldUsers(room)
+  res.json(room);
 });
 
-// Simple in-memory store for now
-var dreams = [
-  "Find and count some sheep",
-  "Climb a really tall mountain",
-  "Wash the dishes"
-];
+app.put("/rooms/:roomId/:userId", (req, res) => {
+  const roomId = req.params.roomId
+  const userId = req.params.userId
+  const room = rooms[roomId] || createRoom(roomId)
+  setUser(room, userId, req.body.imageData)
+  res.sendStatus(200);
+});
+
+function purgeOldUsers(room) {
+  for(let user in room.users) {
+    if ((new Date() - room.users[user].updatedAt) > (1000 * 20)) {
+      console.log("purge expired user: " + user)
+      delete room.users[user]
+    }
+  }
+}
+
+function setUser(room, userId, imageData) {
+  room.users[userId] = {
+    imageData: imageData,
+    updatedAt: new Date()
+  }
+  return room.users[userId]
+}
+
+function createRoom(roomId) {
+  rooms[roomId] = {
+    users: {}
+  };
+  return rooms[roomId];
+}
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+const listener = app.listen(process.env.PORT, () => {
+  console.log("Your app is listening on port " + listener.address().port);
 });

@@ -6,122 +6,141 @@
 </head>
   
 <style>
-  body {
-    margin: 0 0 0 0;
-  }
-  
-  #background {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: #191413;
-  }
-  
   .pic {
     display: inline-block;
-    margin: 2px 1px 2px 1px;
+    margin: 1px 1px 1px 1px;
+    height: 250px;
+    vertical-align: bottom;
+    background-color: 
   }
 </style>
   
-<body>
+<body style="background: #191413; margin: 0 0 0 0;">
 
-  <video autoplay></video>
-  <div id="background">
-  </div>
+  <video autoplay height="250" preload="auto" style="opacity: 0; position: absolute;"></video>
+  <div id="background"></div>
 
-<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
-<script src="/lz-string.js"></script>
 <script>
-  firebase.initializeApp({
-    apiKey: "AIzaSyA1GrOBNfS-lQPOKWtdV3KGMa06v0kOe1I",
-    authDomain: "virtualoffice-7562b.firebaseapp.com",
-    databaseURL: "https://virtualoffice-7562b.firebaseio.com",
-    projectId: "virtualoffice-7562b",
-    storageBucket: "virtualoffice-7562b.appspot.com",
-    messagingSenderId: "309101480991"
-  })
+  const video = document.querySelector('video')
+  const currentRoom = joinRoom()  
+  const username = getUsername()
+  const user = username + "-" + uuid()
   
-  var video = document.querySelector('video')
-  var user = uuid()
-  var currentRoom = joinRoom()  
-  var usersRef = firebase.database().ref('rooms/' + currentRoom + '/users')
+  switchOnWebcam()
   
-  if (navigator.mediaDevices) {
-    navigator.mediaDevices.getUserMedia({video: true}) 
-      .then(stream => video.srcObject = stream) 
-      .catch(error => document.body.textContent = 'Error accessing camera: ' + error.name)
-  }
-  
+  updateRoom()
   sendCurrentPic()
-  setInterval(() => sendCurrentPic(), 10000)
-  
-  window.onbeforeunload = () => {
-    firebase.database().ref('rooms/' + currentRoom + '/users/' + user).remove()
-    return "really?"
+  setInterval(() => sendCurrentPic(), 5000)
+  setInterval(() => updateRoom(), 3000)
+  //setInterval(() => drawProgress(username), 1000)
+
+  function switchOnWebcam() {
+    if (navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia({video: true}) 
+      .then(stream => video.srcObject = stream) 
+      .catch(err => document.body.innerHTML = '<h2 style="color: white">Error accessing camera:<br>' + err.name + "<br>" + err.message + '</h2>')
+    }
   }
   
-  usersRef.on("child_added", data => { 
-    console.log("added", data.val())
-    showPic(data.val())
-  })
+  function updateRoom() {
+    fetch('rooms/' + currentRoom).then(res => res.json()).then(room => {
+      showPic(username, room.users[username]); // show own image first
+      
+      const images = document.getElementById('background').childNodes;
+      images.forEach(image => {
+        if (room.users[image.id]) {
+          showPic(image.id, room.users[image.id].imageData)
+          delete room.users[image.id]
+        } else {
+          image.outerHTML = ""; // remove element
+        }
+      })
+      
+      for(let user in room.users) {
+        showPic(user, room.users[user].imageData)
+      }
+    });
+  }
   
-  usersRef.on("child_removed", data => {
-    console.log("removed", data.val())
-    let img = document.getElementById(data.val().name)
-    document.getElementById('background').removeChild(img)
-  })
-  
-  usersRef.on("child_changed", data => {
-    console.log("changed", data.val())
-    showPic(data.val())
-  })
-  
-  function showPic(user) {
-    let img = document.getElementById(user.name)
+  function showPic(id, imageData) {
+    let img = document.getElementById(id)
     if (!img) {
       img = document.createElement('img')
-      img.setAttribute("id", user.name)
+      img.setAttribute("id", id)
       img.setAttribute("class", "pic")
       document.getElementById('background').appendChild(img)
     }
-    img.src = LZString.decompress(user.pic)
-    console.log("src", { string: img.src })
+    img.src = imageData
   }
   
   function uuid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      var r = Math.random() * 16 |  0, v = c == 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
   }
   
   function sendCurrentPic() {
-    firebase.database().ref('rooms/' + currentRoom + '/users/' + user).set({
-      name: user,
-      pic: takePicture(),
-      time: firebase.database.ServerValue.TIMESTAMP
+    fetch('rooms/' + currentRoom + '/' + username, {
+      method: 'put',
+      body: JSON.stringify({ imageData: takePicture(username)}),
+      headers: { 'Content-Type': 'application/json' },
     })
   }
   
   function joinRoom() {
-    let roomUrlPrefix = "#room/"
+    const roomUrlPrefix = "#room/";
     if (window.location.hash && window.location.hash.startsWith(roomUrlPrefix)) {
-      return window.location.hash.replace(roomUrlPrefix, "") 
+      return window.location.hash.replace(roomUrlPrefix, "");
     } 
-    let roomName = uuid()
-    window.location.hash = roomUrlPrefix + roomName
-    return roomName
+    let roomName = prompt("Enter a name for your new room", uuid().substr(0, 13));
+    roomName = roomName || joinRoom();
+    window.location.hash = roomUrlPrefix + roomName;
+    return roomName;
   }
   
-  function takePicture() {
+  function getUsername() {
+    let name = localStorage.getItem('username');
+    if (name) return name;
+    
+    name = prompt("Whats your name?")
+    console.log("entered username:", name)
+    name = name || getUsername();
+    localStorage.setItem('username', name);
+    return name
+  }
+    
+  function drawProgress(username) {
     canvas = document.createElement('canvas')
     canvas.width = video.offsetWidth
     canvas.height = video.offsetHeight
-    canvas.getContext('2d').drawImage(video, 0, 0, video.offsetWidth, video.offsetHeight)
-    console.log("beforecompress", { string: canvas.toDataURL('image/jpeg') })
-    console.log("compress", { string: LZString.compress(canvas.toDataURL('image/jpeg')) })
-    return LZString.compress(canvas.toDataURL('image/jpeg'))
+    context = canvas.getContext('2d')
+    context.beginPath();
+    context.strokeStyle = "green"
+    context.moveTo(canvas.width - 1, 0);
+    context.lineTo(canvas.width - 1, video.offsetHeight);
+    context.stroke(); 
+    document.getElementById(username).src = canvas.toDataURL('image/jpeg')
+  }
+  
+  function takePicture(username) {
+    canvas = document.createElement('canvas')
+    canvas.width = video.offsetWidth
+    canvas.height = video.offsetHeight
+    context = canvas.getContext('2d')
+    context.drawImage(video, 0, 0, video.offsetWidth, video.offsetHeight)
+    context.font = "2em Arial"
+    context.textBaseline = "hanging"
+    context.shadowOffsetX = 0;
+    context.shadowOffsetY = 0;
+    context.shadowColor = "rgba(255,255,255,0.5)";
+    context.shadowBlur = 6;
+    context.fillText(username, 5, 5)
+    const result = canvas.toDataURL('image/jpeg')
+    if (result.length < 10) {
+      throw "Camera did not provide image"
+    }
+    return result;
   }
 </script>
 </body>
