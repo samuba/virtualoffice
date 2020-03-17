@@ -1,27 +1,11 @@
-Welcome to the Glitch BETA
+Virtual-Office
 =========================
 
-Click `Show` in the header to see your app live. Updates to your code will instantly deploy and update live.
+Get a feeling of presence for your remote working colleagues as if they were in the same room as you.
+wanna know who is afk or eating right now so you can join? Just have a look in the Virtual-Office.
 
-**Glitch** is the friendly commmunity where you'll build the app of your dreams. Glitch lets you instantly create, remix, edit, and host an app, bot or site, and you can invite collaborators or helpers to simultaneously edit code with you.
+What id does:
+Update every 5 seconds the webcam pictures of users in the room. 
 
-Find out more [about Glitch](https://glitch.com/about).
+Use it: [virtual-office.azurewebsites.net](https://virtual-office.azurewebsites.net)
 
-
-Your Project
-------------
-
-On the front-end,
-- edittttt `public/client.js`, `public/style.css` and `views/index.html`
-- drag in `assets`, like images or music, to add them to your project
-
-On the back-end,
-- your app starts at `server.js`
-- add frameworks and packages in `package.json`
-- safely store app secrets in `.env` (nobody can see this but you and people you invite)
-
-
-Made by [Fog Creek](https://fogcreek.com/)
--------------------
-
-\ ゜o゜)ノ
