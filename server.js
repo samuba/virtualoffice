@@ -80,7 +80,7 @@ function setUser(room, userId, imageData) {
 function createRoom(roomId) {
   rooms[roomId] = {
     users: {},
-    chat: getArrayWithLimitedLength(500)
+    chat: getArrayWithLimitedLength(400)
   };
   return rooms[roomId];
 }
