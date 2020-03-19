@@ -20,17 +20,13 @@
   
 <body style="background: #191413; color: white; margin: 0 0 0 0;">
   <div id="app" v-cloak>
-    <div class="ml-2">
-      Raum: {{room}}      
-      <button  @click="showChat = !showChat">toggle chat</button>
+    <div class="ml-2 my-1">
+      {{room}}      
+      <button @click="showChat=!showChat" title="toggle chat" class="ml-2 p-1">🗩</button>
     </div>
 
     <div class="flex">
-        <div class="bg-gray-900 flex-initial">
-            <iframe width="560" height="315" src="https://www.youtube.com/embed/jTXN9iTKHc8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-
-        <div class="flex-1 bg-gray-100" v-if="showChat" :class="{hide: !showChat}">
+        <div class="flex-1 bg-gray-100" :class="{hide: !showChat}">
           <div class=" h-64 overflow-auto p-2 text-black" id="chat-messages">
             <div v-for="entry in chat" :key="entry.createdAt" :title="entry.createdAt" class="mt-1">
               <img :src="pictureForUser(entry.authorName)" class="inline h-8">
