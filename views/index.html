@@ -127,9 +127,7 @@
         return "hsl(" + (hash % 360) + ",100%,30%)"
       },
       
-      joinRoom: function () {
-        return "testroom"
-        
+      joinRoom: function () {        
         const roomUrlPrefix = "#room/";
         if (window.location.hash && window.location.hash.startsWith(roomUrlPrefix)) {
           return window.location.hash.replace(roomUrlPrefix, "");
