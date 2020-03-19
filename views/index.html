@@ -20,9 +20,11 @@
   
 <body style="background: #191413; color: white; margin: 0 0 0 0;">
   <div id="app" v-cloak>
-    <div class="ml-2 my-1">
+    <div class="pl-4 py-2 bg-gray-900">
       {{room}}      
-      <button @click="showChat=!showChat" title="toggle chat" class="ml-2 p-1">🗩</button>
+      <button @click="showChat=!showChat" title="toggle chat" class="ml-3">
+        🗩 <div v-if="unreadMessages" class="bg-red-500 w-2 h-2 rounded-full relative inline-block" style="left: -0.5rem; top: -0.38rem;"></div> 
+      </button>
     </div>
 
     <div class="flex">
@@ -56,7 +58,18 @@
       videoElement: document.querySelector('video'),
       currentMessage: "",
       chat: [],
-      showChat: true,
+      showChat: false,
+      lastMessageReadAt: "",
+    },
+
+    computed: {
+      unreadMessages: function() {
+          console.log("chat", this.chat)
+          console.log("this.lastMessageReceivedAt", this.lastMessageReadAt)
+          if(this.chat.length === 0) return false;
+          if(!this.lastMessageReadAt) return true
+          return this.chat[this.chat.length-1].createdAt != this.lastMessageReadAt
+      }
     },
     
     mounted: function() {
@@ -84,7 +97,10 @@
         }) 
       },
 
-      updateChat: function(newChat) {        
+      updateChat: function(newChat) {  
+        if (this.showChat) {
+            this.lastMessageReadAt = newChat[newChat.length-1].createdAt;
+        }
         this.chat = newChat;   
         this.$nextTick(() => {
             const chatElement = this.$el.querySelector("#chat-messages");
