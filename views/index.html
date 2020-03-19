@@ -14,7 +14,8 @@
     background-color: black;
   }
 
-  [v-cloak] {display: none}
+  [v-cloak] {display: none;}
+
   .hide { display: none;}
 </style>
   
@@ -64,8 +65,6 @@
 
     computed: {
       unreadMessages: function() {
-          console.log("chat", this.chat)
-          console.log("this.lastMessageReceivedAt", this.lastMessageReadAt)
           if(this.chat.length === 0) return false;
           if(!this.lastMessageReadAt) return true
           return this.chat[this.chat.length-1].createdAt != this.lastMessageReadAt
@@ -143,6 +142,8 @@
           navigator.mediaDevices.getUserMedia({video: true}) 
           .then(stream => this.videoElement.srcObject = stream) 
           .catch(err => document.body.innerHTML = '<h2 style="color: white">Error accessing camera:<br>' + err.name + "<br>" + err.message + '</h2>')
+        } else {
+          document.body.innerHTML = '<h2 style="color: white">Your browser is too old. Please install Chrome or Firefox</h2>';
         }
       },
       
