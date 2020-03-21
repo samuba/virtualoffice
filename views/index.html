@@ -9,7 +9,7 @@
   .pic {
     display: inline-block;
     margin: 1px 1px 1px 1px;
-    height: 250px;
+    height: 200px;
     vertical-align: bottom;
     background-color: black;
   }
@@ -17,37 +17,46 @@
   [v-cloak] {display: none;}
 
   .hide { display: none;}
+
 </style>
   
 <body style="background: #191413; color: white; margin: 0 0 0 0;">
   <div id="app" v-cloak>
-    <div class="pl-4 py-2 bg-gray-900">
-      {{room}}      
-      <button @click="showChat=!showChat" title="toggle chat" class="ml-3">
-        🗩 <div v-if="unreadMessages" class="bg-red-500 w-2 h-2 rounded-full relative inline-block" style="left: -0.5rem; top: -0.38rem;"></div> 
-      </button>
-    </div>
+
 
     <div class="flex">
-        <div class="flex-1 bg-gray-100" :class="{hide: !showChat}">
-          <div class=" h-64 overflow-auto p-2 text-black" id="chat-messages">
-            <div v-for="entry in chat" :key="entry.createdAt" :title="entry.createdAt" class="mt-1">
-              <img :src="pictureForUser(entry.authorName)" class="inline h-8">
-              <span :style="'color:' + colorFromString(entry.authorName)">{{entry.authorName}}:</span> 
-              {{entry.message}}
+        <div class="">
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/M6Iig0iQUXo" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+
+        <div class=" w-full">
+            <div class="pl-4 py-2 bg-gray-900">
+                {{room}}      
+                <button @click="showChat=!showChat" title="toggle chat" class="ml-3">
+                    🗩 <div v-if="unreadMessages" class="bg-red-500 w-2 h-2 rounded-full relative inline-block" style="left: -0.5rem; top: -0.38rem;"></div> 
+                </button>
             </div>
-          </div>
-          <div class="flex">
-            <input v-model="currentMessage" @keyup.enter="postMessage" placeholder="type your message here..." class="w-full p-2 text-black">
-            <button @click="postMessage" title="send message" class="bg-white text-2xl">✉</button>
-          </div>
+
+            <div class="flex-1 bg-gray-100" :class="{hide: !showChat}">
+                <div class="overflow-auto p-2 text-black" id="chat-messages" style="height: 235px;">
+                    <div v-for="entry in chat" :key="entry.createdAt" :title="entry.createdAt" class="mt-1">
+                        <img :src="pictureForUser(entry.authorName)" class="inline h-8">
+                        <span :style="'color:' + colorFromString(entry.authorName)">{{entry.authorName}}:</span> 
+                        {{entry.message}}
+                    </div>
+                </div>
+                <div class="flex">
+                    <input v-model="currentMessage" @keyup.enter="postMessage" placeholder="type your message here..." class="w-full p-2 text-black">
+                    <button @click="postMessage" title="send message" class="bg-white text-2xl">✉</button>
+                </div>
+            </div>
         </div>
     </div>
     
     <div id="background"></div>
     
   </div>
-  <video autoplay height="250" preload="auto" style="opacity: 0; position: absolute; height:250px;"></video>
+  <video autoplay height="200" preload="auto" style="opacity: 0; position: absolute; height:200px;"></video>
 <link href="https://unpkg.com/tailwindcss@^1.2/dist/tailwind.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script>
@@ -59,7 +68,7 @@
       videoElement: document.querySelector('video'),
       currentMessage: "",
       chat: [],
-      showChat: false,
+      showChat: true,
       lastMessageReadAt: "",
     },
 
@@ -97,7 +106,7 @@
       },
 
       updateChat: function(newChat) {  
-        if (this.showChat) {
+        if (this.showChat && newChat.length > 0) {
             this.lastMessageReadAt = newChat[newChat.length-1].createdAt;
         }
         this.chat = newChat;   
