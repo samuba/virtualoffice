@@ -9,7 +9,7 @@
   .pic {
     display: inline-block;
     margin: 1px 1px 1px 1px;
-    height: 250px;
+    height: 200px;
     vertical-align: bottom;
     background-color: black;
   }
@@ -20,11 +20,12 @@
 </style>
   
 <body style="background: #191413; color: white; margin: 0 0 0 0;">
-  <div id="app" v-cloak>
+  <div id="app" v-cloak class="lg:text-base text-4xl">
     <div class="pl-4 py-2 bg-gray-900">
-      {{room}}      
+      {{room}}
       <button @click="showChat=!showChat" title="toggle chat" class="ml-3">
-        🗩 <div v-if="unreadMessages" class="bg-red-500 w-2 h-2 rounded-full relative inline-block" style="left: -0.5rem; top: -0.38rem;"></div> 
+        <ion-icon name="chatbox-outline" class="-2"></ion-icon>
+        <div v-if="unreadMessages" class="bg-red-500 w-2 h-2 rounded-full relative inline-block" style="left: -0.6rem; top: -0.6rem;"></div> 
       </button>
     </div>
 
@@ -38,8 +39,10 @@
             </div>
           </div>
           <div class="flex">
-            <input v-model="currentMessage" @keyup.enter="postMessage" placeholder="type your message here..." class="w-full p-2 text-black">
-            <button @click="postMessage" title="send message" class="bg-white text-2xl">✉</button>
+            <input v-model="currentMessage" @keyup.enter="postMessage" placeholder="type your message here..." class="w-full lg:p-2 p-5 text-black">
+            <button @click="postMessage" title="send message" class="bg-white px-4 lg:text-xl text-5xl">
+              <ion-icon name="send-outline" class="text-gray-800 lg:mt-2 mt-4"></ion-icon>
+            </button>
           </div>
         </div>
     </div>
@@ -47,7 +50,7 @@
     <div id="background"></div>
     
   </div>
-  <video autoplay height="250" preload="auto" style="opacity: 0; position: absolute; height:250px;"></video>
+  <video autoplay height="200" preload="auto" style="opacity: 0; position: absolute; height:200px;"></video>
 <link href="https://unpkg.com/tailwindcss@^1.2/dist/tailwind.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script>
@@ -236,5 +239,6 @@
     }
   })  
 </script>
+<script src="https://unpkg.com/ionicons@5.0.0/dist/ionicons.js"></script>
 </body>
 </html>
